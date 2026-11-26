@@ -1,3 +1,12 @@
+- name: Require an explicit Monit HTTP password
+  ansible.builtin.assert:
+    that:
+      - monit_password is string
+      - monit_password | trim | length > 0
+      - monit_password is not search('["\\x5c\\r\\n]')
+    fail_msg: Set vault_monit_password with Ansible Vault before configuring Monit.
+  no_log: true
+
 - name: Install monit
   apt:
     name: monit
@@ -15,6 +24,8 @@
       use address {{ monit_bind_address }}
       allow {{ monit_user }}:"{{ monit_password }}"
 
+  no_log: true
+  diff: false
   notify: Restart monit
 
 - name: Validate monit config
